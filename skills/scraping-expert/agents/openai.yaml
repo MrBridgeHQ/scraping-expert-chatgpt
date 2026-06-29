@@ -1,0 +1,7 @@
+interface:
+  display_name: "Scraping Expert"
+  short_description: "Design robust web scrapers"
+  default_prompt: "Use $scraping-expert to diagnose the target site before writing scraper code."
+
+policy:
+  allow_implicit_invocation: true
