@@ -1,6 +1,6 @@
-# Managed Scraping APIs — When to Pay Someone Else
+# Managed Scraping APIs - When to Pay Someone Else
 
-When DIY economics break down — hardest targets, low volume, or when speed-to-market matters more than per-call cost — managed scraping APIs are the right answer. This page covers the major vendors, when to pick which, how to integrate them safely, and how to fail over between them.
+When DIY economics break down - hardest targets, low volume, or when speed-to-market matters more than per-call cost - managed scraping APIs are the right answer. This page covers the major vendors, when to pick which, how to integrate them safely, and how to fail over between them.
 
 The decision is not "DIY vs. managed." It's "which tool for which target." A production scraper portfolio uses both, often within the same scraper.
 
@@ -13,7 +13,7 @@ Use a managed API when:
 1. **The target is pathological.** LinkedIn, Amazon at scale, ticketing sites, sneaker drops, banking. The arms race is full-time work; pay someone else to do it.
 2. **Volume is low and DIY amortization is bad.** A scraper that runs 20 times a month doesn't justify maintaining a Camoufox + residential setup.
 3. **Speed-to-market matters.** A managed API delivers a working scraper in hours; DIY for a hard target takes days.
-4. **You already have credits.** Firecrawl, Bright Data, ZenRows credits sitting unused are sunk cost — use them.
+4. **You already have credits.** Firecrawl, Bright Data, ZenRows credits sitting unused are sunk cost - use them.
 5. **Compliance / liability concerns.** Some managed APIs have explicit ToS provisions for scraping; using them shifts some risk.
 
 Avoid managed APIs when:
@@ -36,7 +36,7 @@ Five vendors cover most production cases. Each has a specialty.
 **Strengths**:
 - Best-in-class output for AI pipelines (clean markdown, no junk).
 - Schema-based extraction with LLM under the hood.
-- `/scrape`, `/crawl`, `/map`, `/extract`, `/search` — broad surface.
+- `/scrape`, `/crawl`, `/map`, `/extract`, `/search` - broad surface.
 - MCP-ready (a Firecrawl MCP server is available).
 
 **Weaknesses**:
@@ -50,8 +50,7 @@ Five vendors cover most production cases. Each has a specialty.
 
 ```ts
 // Firecrawl v2 SDK (package `firecrawl`). The v1 `@mendable/firecrawl-js`
-// package and the `formats: ['extract']` + `extract:{}` shape are retired —
-// structured extraction is now the `json` format + `jsonOptions`.
+// package and the `formats: ['extract']` + `extract:{}` shape are retired - // structured extraction is now the `json` format + `jsonOptions`.
 import { Firecrawl } from 'firecrawl';
 
 const firecrawl = new Firecrawl({ apiKey: process.env.FIRECRAWL_API_KEY });
@@ -149,7 +148,7 @@ const $ = cheerio.load(html);
 **Specialty**: Premium managed Chromium accessible via CDP. The most expensive but most capable option.
 
 **Strengths**:
-- Connect via CDP — your Playwright/Puppeteer code runs unchanged.
+- Connect via CDP - your Playwright/Puppeteer code runs unchanged.
 - Built-in unblocking (proxies, fingerprints, CAPTCHA all handled by Bright Data).
 - Reliable on the absolute hardest targets (LinkedIn, sneakers, tickets).
 
@@ -175,13 +174,13 @@ const html = await page.content();
 await browser.close();
 ```
 
-The session is full Playwright — selectors, screenshots, evaluation — but the browser runs on Bright Data's infrastructure with their unblocking layer.
+The session is full Playwright - selectors, screenshots, evaluation - but the browser runs on Bright Data's infrastructure with their unblocking layer.
 
 ### Other notable mentions
 
-- **Apify Store** — for many targets (Google Maps, Instagram, LinkedIn), there are pre-built Apify Actors maintained by Apify or community publishers. They handle the protection arms race so you don't have to. When the target is "common enough" to have a maintained Actor, that's often the right answer.
-- **SerpApi, Serper** — specialized for Google SERP, Bing, etc. Better than DIY for SERP scraping at any volume.
-- **Oxylabs Web Scraper API** — premium, similar tier to Bright Data. Less well-known but effective.
+- **Apify Store** - for many targets (Google Maps, Instagram, LinkedIn), there are pre-built Apify Actors maintained by Apify or community publishers. They handle the protection arms race so you don't have to. When the target is "common enough" to have a maintained Actor, that's often the right answer.
+- **SerpApi, Serper** - specialized for Google SERP, Bing, etc. Better than DIY for SERP scraping at any volume.
+- **Oxylabs Web Scraper API** - premium, similar tier to Bright Data. Less well-known but effective.
 
 ---
 
@@ -255,7 +254,7 @@ Your route handler / entry point depends on `ScrapingClient`, not on the specifi
 
 ### Cache aggressively
 
-Use the same cache pattern (KV Store on Apify; Redis / Postgres / disk on a standalone host) as for any external API. A 30-day TTL on managed API responses saves real money — every cache hit is a vendor call you didn't make.
+Use the same cache pattern (KV Store on Apify; Redis / Postgres / disk on a standalone host) as for any external API. A 30-day TTL on managed API responses saves real money - every cache hit is a vendor call you didn't make.
 
 ```ts
 const cached = await withCache(
@@ -294,7 +293,7 @@ const client = new FailoverClient(
 );
 ```
 
-Use this sparingly — every failover doubles your potential cost on hard pages. But for scrapers where uptime matters more than per-call cost (alerting, monitoring), it's the right pattern.
+Use this sparingly - every failover doubles your potential cost on hard pages. But for scrapers where uptime matters more than per-call cost (alerting, monitoring), it's the right pattern.
 
 ### Cost monitoring
 
@@ -320,7 +319,7 @@ This makes the cost visible at the record level. You can sum vendor cost across 
 
 Even managed APIs fail. The provider's IPs get burned, the target adds a new layer, the vendor's bypass falls behind. Symptoms:
 
-- 403/429 from the vendor (not from the target — the vendor is rate-limiting your account).
+- 403/429 from the vendor (not from the target - the vendor is rate-limiting your account).
 - Empty/incomplete content where there was rich content before.
 - Redirect loops, fake error pages, suspicious "challenge" content in responses.
 

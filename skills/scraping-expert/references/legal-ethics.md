@@ -1,6 +1,6 @@
 # Legal and Ethical Boundaries
 
-Scraping sits in a legal grey area in most jurisdictions. The technical question — "can we get this data?" — is usually solvable. The right question is "should we?". This page covers the legal frameworks that touch scraping, the ethical guardrails any scraping project should operate within, and the lines that don't get crossed.
+Scraping sits in a legal grey area in most jurisdictions. The technical question - "can we get this data?" - is usually solvable. The right question is "should we?". This page covers the legal frameworks that touch scraping, the ethical guardrails any scraping project should operate within, and the lines that don't get crossed.
 
 This is not legal advice. For specific high-stakes scraping projects (especially involving user-generated content, behind-login data, or commercial redistribution), consult a lawyer.
 
@@ -12,7 +12,7 @@ Four bodies of law most often touch scraping. Each carries different risk in dif
 
 ### Terms of Service (contract law)
 
-When you use a website, you may be bound by its Terms of Service. Most ToS forbid automated access. Violating them is a breach of contract — civil liability, not criminal.
+When you use a website, you may be bound by its Terms of Service. Most ToS forbid automated access. Violating them is a breach of contract - civil liability, not criminal.
 
 Practical implications:
 - The risk of breach-of-contract action against an individual scraper is extremely low for non-commercial use.
@@ -20,7 +20,7 @@ Practical implications:
 - Aggressive sites (LinkedIn famously) have sued scrapers and won. The case law is mixed but trending toward "ToS matter".
 
 Mitigations:
-- Don't accept ToS via login if you're scraping while ignoring the ToS — you create a stronger contract claim against yourself.
+- Don't accept ToS via login if you're scraping while ignoring the ToS - you create a stronger contract claim against yourself.
 - Read the ToS for high-stakes targets. Note the explicit prohibitions.
 - Don't bypass paywalls or subscription gates. That's not "ToS grey area"; it's clear violation.
 
@@ -102,7 +102,7 @@ When to absolutely respect:
 
 ## What this skill won't build (any project)
 
-Drawing the line clearly. Regardless of platform — Apify Actor, standalone scraper, web-app backend — the scrapers built under this skill do not:
+Drawing the line clearly. Regardless of platform - Apify Actor, standalone scraper, web-app backend - the scrapers built under this skill do not:
 
 - **Scrape behind authentication that isn't your own.** It's fine to build a scraper that uses your own account cookie to fetch your own data; it is not fine to build a scraper that fetches arbitrary profiles using credentials you don't own.
 - **Republish copyrighted content.** Editorial/review text from professional authors is not republished; only quantitative ratings, prices, and metadata.
@@ -149,7 +149,7 @@ A CAPTCHA is the site's explicit signal that they don't want automated access. S
 
 ### Data that triggers obvious anti-bot escalation
 
-When a target deploys a CAPTCHA, redirects to a challenge page, or returns fake content specifically to fool scrapers, they are signaling: do not scrape this. Persisting through those signals is increasingly being read in court as evidence of "intent to circumvent" — closer to CFAA territory.
+When a target deploys a CAPTCHA, redirects to a challenge page, or returns fake content specifically to fool scrapers, they are signaling: do not scrape this. Persisting through those signals is increasingly being read in court as evidence of "intent to circumvent" - closer to CFAA territory.
 
 ### Reselling raw scraped content
 
@@ -165,7 +165,7 @@ Three questions to ask before any new scraping project:
 2. **Is there an official API for this?** If yes, use it. The legal and operational risk drops to near zero when there's an explicit channel.
 3. **Would I be comfortable being identified as the operator of this scraper?** If you'd want to hide it, that's a signal.
 
-These aren't tests of legality — they're tests of legitimacy. Legitimate scraping survives scrutiny.
+These aren't tests of legality - they're tests of legitimacy. Legitimate scraping survives scrutiny.
 
 ---
 
@@ -184,15 +184,15 @@ When a request falls into this territory, the response is to explain the boundar
 
 ---
 
-## The Identity Verification (IDV) wall — a hard limit
+## The Identity Verification (IDV) wall - a hard limit
 
-A new category of anti-bot is emerging in 2026: when behavioral analysis and fingerprinting fail to give the defender confidence, some sites escalate to **identity verification** — a requirement to submit a government-issued ID and a selfie. Vendors like Vouched, Onfido, Persona, Veriff, and Jumio supply this. It's increasingly deployed on banking, healthcare, gambling, crypto, and high-trust e-commerce.
+A new category of anti-bot is emerging in 2026: when behavioral analysis and fingerprinting fail to give the defender confidence, some sites escalate to **identity verification** - a requirement to submit a government-issued ID and a selfie. Vendors like Vouched, Onfido, Persona, Veriff, and Jumio supply this. It's increasingly deployed on banking, healthcare, gambling, crypto, and high-trust e-commerce.
 
 **This is a hard limit. Don't engineer around it.** Bypassing IDV requires either:
 
-1. Submitting fake or stolen ID documents — fraud, full stop.
-2. Using a real person's ID without their authorization — identity theft.
-3. Synthesizing a deepfake selfie + altered ID document — also fraud, and pattern-detected by the IDV vendor.
+1. Submitting fake or stolen ID documents - fraud, full stop.
+2. Using a real person's ID without their authorization - identity theft.
+3. Synthesizing a deepfake selfie + altered ID document - also fraud, and pattern-detected by the IDV vendor.
 
 All three are actual crimes in most jurisdictions, not grey-area ToS violations. When a target deploys IDV in front of the data you want, the answer is "this site does not allow scraping by anyone whose identity isn't human and verified, and that's a legitimate decision." Move on.
 
@@ -200,9 +200,9 @@ This is a meaningful change from the historical scraping landscape. Anti-bot use
 
 ---
 
-## AI agents in 2026 — a new category, new scrutiny
+## AI agents in 2026 - a new category, new scrutiny
 
-The 2026 anti-bot landscape is reshaping around AI agents specifically — autonomous software that perceives, plans, and acts (the kind of system you are essentially building when you ship MCP servers and multi-agent scrapers). Three implications:
+The 2026 anti-bot landscape is reshaping around AI agents specifically - autonomous software that perceives, plans, and acts (the kind of system you are essentially building when you ship MCP servers and multi-agent scrapers). Three implications:
 
 ### Anti-bot is being designed against AI agents specifically
 
@@ -212,25 +212,25 @@ Vendors now market "anti-bot for AI agents" as a distinct category. The detectio
 - Inability to handle unexpected interruptions (a popup, a redirect, a layout change)
 - Pattern-stable behavior across many sessions (AI agents trained on similar prompts produce similar action sequences)
 
-Modern scrapers — especially LLM-driven ones — produce these patterns naturally. The countermeasure is not "make the AI more humanlike" but "use AI for the parts that benefit from intelligence (extraction, classification) and use deterministic code for the navigation, with humanlike pacing built in."
+Modern scrapers - especially LLM-driven ones - produce these patterns naturally. The countermeasure is not "make the AI more humanlike" but "use AI for the parts that benefit from intelligence (extraction, classification) and use deterministic code for the navigation, with humanlike pacing built in."
 
 ### Know Your Agent (KYA)
 
-A new category of anti-bot, often called "Know Your Agent," is emerging. The concept: instead of trying to detect whether a request is from a bot vs. human, sites verify the identity of the agent itself — what model, what operator, what authorization. The MCP-I specifications (an extension to Model Context Protocol for agent identity) are an early implementation.
+A new category of anti-bot, often called "Know Your Agent," is emerging. The concept: instead of trying to detect whether a request is from a bot vs. human, sites verify the identity of the agent itself - what model, what operator, what authorization. The MCP-I specifications (an extension to Model Context Protocol for agent identity) are an early implementation.
 
-Practical implication: as MCP becomes mainstream, sites may start requiring AI agents to identify themselves cryptographically and authorize specific use cases. Agents that comply get access; those that don't get treated as malicious bots. This is an *opportunity*, not just a threat — for legitimate use cases, KYA may make access easier than today's anti-bot arms race. MCP servers may eventually want to support this directly.
+Practical implication: as MCP becomes mainstream, sites may start requiring AI agents to identify themselves cryptographically and authorize specific use cases. Agents that comply get access; those that don't get treated as malicious bots. This is an *opportunity*, not just a threat - for legitimate use cases, KYA may make access easier than today's anti-bot arms race. MCP servers may eventually want to support this directly.
 
 ### Compliance-driven enforcement
 
 Anti-bot deployment is increasingly *required* by regulation, not just chosen by site owners. Specifically:
 
-- **GDPR** (EU) — Article 32 requires "appropriate technical and organisational measures" against unauthorised processing. Aggressive scraping of EU residents' personal data is increasingly read as such unauthorised processing. Penalties can reach 4% of global revenue.
-- **PCI DSS** (payment) — anti-bot is a recognized control for credit card data environments. Sites that handle payments are under audit pressure to deploy it.
-- **HIPAA** (US healthcare) — patient portals deploy anti-bot to prevent unauthorized access to PHI. The penalties for breach of this kind are severe.
-- **CCPA/CPRA** (California) — gives consumers rights over scraped data; bypassing the controls undermines the site's compliance.
-- **National AI Acts (EU AI Act etc.)** — increasingly apply to AI agents specifically, including scraping by them.
+- **GDPR** (EU) - Article 32 requires "appropriate technical and organisational measures" against unauthorised processing. Aggressive scraping of EU residents' personal data is increasingly read as such unauthorised processing. Penalties can reach 4% of global revenue.
+- **PCI DSS** (payment) - anti-bot is a recognized control for credit card data environments. Sites that handle payments are under audit pressure to deploy it.
+- **HIPAA** (US healthcare) - patient portals deploy anti-bot to prevent unauthorized access to PHI. The penalties for breach of this kind are severe.
+- **CCPA/CPRA** (California) - gives consumers rights over scraped data; bypassing the controls undermines the site's compliance.
+- **National AI Acts (EU AI Act etc.)** - increasingly apply to AI agents specifically, including scraping by them.
 
-The practical takeaway: scraping in regulated sectors carries multiplied risk. A scraper that pulls public e-commerce prices and one that pulls patient-portal records are not in the same risk class — even if the technical bypass is identical. Stay out of the regulated sectors unless the use case is unambiguously legitimate (e.g., a healthcare provider scraping their own portal).
+The practical takeaway: scraping in regulated sectors carries multiplied risk. A scraper that pulls public e-commerce prices and one that pulls patient-portal records are not in the same risk class - even if the technical bypass is identical. Stay out of the regulated sectors unless the use case is unambiguously legitimate (e.g., a healthcare provider scraping their own portal).
 
 ---
 
@@ -252,6 +252,6 @@ For deeper reading:
 
 - The hiQ Labs v. LinkedIn case history (US scraping case law).
 - GDPR text, especially Articles 6 (lawful basis) and 14 (notice).
-- Each major target site's ToS — read once before building a serious project against them.
+- Each major target site's ToS - read once before building a serious project against them.
 
-When a project pushes against any of these boundaries, the right move is a short conversation about what you're trying to accomplish — usually there's a legitimate variant of the project that doesn't carry the risk.
+When a project pushes against any of these boundaries, the right move is a short conversation about what you're trying to accomplish - usually there's a legitimate variant of the project that doesn't carry the risk.

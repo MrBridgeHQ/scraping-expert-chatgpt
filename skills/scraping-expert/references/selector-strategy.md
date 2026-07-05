@@ -1,4 +1,4 @@
-# Selector Strategy — Building Resilient Extraction
+# Selector Strategy - Building Resilient Extraction
 
 Selectors break. Sites redesign, A/B tests roll out, ad-hoc class names get refactored. A scraper that depends on `.product-price-current-v2-final-final` will work for six weeks and then mysteriously return nulls. This page is about building extraction that survives.
 
@@ -50,7 +50,7 @@ Classes that describe what the element *is* (not what it looks like) tend to be 
 Stable: `.product-name`, `.review-author`, `.price-amount`
 Volatile: `.text-lg.font-bold.mt-4`, `.css-1a2b3c4d`, `.MuiTypography-root`
 
-Tailwind/CSS-in-JS sites generate volatile classes — avoid them as primary anchors.
+Tailwind/CSS-in-JS sites generate volatile classes - avoid them as primary anchors.
 
 ### 4. `data-*` attributes
 
@@ -102,7 +102,7 @@ function extractPrice($: cheerio.CheerioAPI): string | null {
   const altPrice = $('.product-price').text().trim();
   if (altPrice) return altPrice;
   
-  // 5. last-resort heuristic — find any element that looks like a price
+  // 5. last-resort heuristic - find any element that looks like a price
   const heuristic = $('*').filter((_, el) => /^\$\d+(\.\d{2})?$/.test($(el).text().trim())).first().text().trim();
   if (heuristic) return heuristic;
   
@@ -163,7 +163,7 @@ Schema validation gives you four things:
 1. **Early detection of site changes.** If the price selector starts returning a string instead of a number, the schema rejects it immediately, the failure is logged with the reason, and the dataset gets an error record instead of garbage data.
 2. **Type safety for downstream consumers.** Whoever uses the dataset can rely on the shape.
 3. **Documentation in code.** The schema is also the README of what the scraper produces.
-4. **Anti-bot canary.** This is the critical one and often missed: anti-bot vendors (especially Akamai and PerimeterX) sometimes return HTTP 200 with empty or fake content rather than a 403. The HTTP status looks fine; the data is junk. Schema validation catches this — required fields missing means either the site changed or you're being silently blocked. The diagnosis isn't immediate, but the failure surfaces, which is the whole point. **Treat schema validation failures with the same urgency as outright HTTP errors.**
+4. **Anti-bot canary.** This is the critical one and often missed: anti-bot vendors (especially Akamai and PerimeterX) sometimes return HTTP 200 with empty or fake content rather than a 403. The HTTP status looks fine; the data is junk. Schema validation catches this - required fields missing means either the site changed or you're being silently blocked. The diagnosis isn't immediate, but the failure surfaces, which is the whole point. **Treat schema validation failures with the same urgency as outright HTTP errors.**
 
 A useful pattern: tag schema-failed records with a `suspect_silent_block: true` flag in the error output when the page loaded successfully (200 OK) but no critical fields parsed. This trains operators to recognize the pattern.
 
@@ -171,8 +171,8 @@ A useful pattern: tag schema-failed records with a `suspect_silent_block: true` 
 
 When configuring a browser-based scraper (Playwright, Camoufox), validate the fingerprint it produces before deploying. Two free tools in your browser do this:
 
-- **CreepJS** (`creepjs.com`) — runs the most rigorous open-source fingerprint test. Reports a stability and trust score, lists every detection vector it caught, and shows what an anti-bot vendor would see.
-- **FingerprintJS demo** — commercial-grade fingerprinting library; test page shows the visitorId and the contributing signals.
+- **CreepJS** (`creepjs.com`) - runs the most rigorous open-source fingerprint test. Reports a stability and trust score, lists every detection vector it caught, and shows what an anti-bot vendor would see.
+- **FingerprintJS demo** - commercial-grade fingerprinting library; test page shows the visitorId and the contributing signals.
 
 How to use them in practice:
 
@@ -182,7 +182,7 @@ How to use them in practice:
 4. Inspect: is the trust score reasonable? Does the OS match the User-Agent? Are Canvas, WebGL, AudioContext outputs internally consistent?
 5. If anomalies surface, fix them in configuration before pointing at the real target.
 
-This is one of the few cases where running the scraper against a non-fixture URL is acceptable — the test pages are public diagnostic tools that exist precisely for this purpose, and you're not extracting data from them.
+This is one of the few cases where running the scraper against a non-fixture URL is acceptable - the test pages are public diagnostic tools that exist precisely for this purpose, and you're not extracting data from them.
 
 ---
 
@@ -226,7 +226,7 @@ function clean(text: string | undefined): string | undefined {
 }
 ```
 
-Don't lowercase or strip punctuation — you may need it later.
+Don't lowercase or strip punctuation - you may need it later.
 
 ### Date fields
 
@@ -265,7 +265,7 @@ For request enqueueing, Crawlee's `enqueueLinks` handles this automatically. For
 
 ### Image URLs
 
-Same — resolve to absolute. Also strip tracking parameters and resize hints when normalization helps:
+Same - resolve to absolute. Also strip tracking parameters and resize hints when normalization helps:
 
 ```ts
 function normalizeImage(url: string): string {
@@ -331,11 +331,11 @@ For non-trivial scrapers, maintain a reference document listing all selectors us
 
 | Field | Primary selector | Fallback 1 | Fallback 2 | Notes |
 |---|---|---|---|---|
-| Result item | `tr.row` | `.search-result` | — | Site uses table-based listings |
-| Item name | `h3.card__name a` | `.title-name` | — | |
-| Release year | `.card__year` | extracted from name regex `\b(19\|20)\d{2}\b` | — | |
+| Result item | `tr.row` | `.search-result` | - | Site uses table-based listings |
+| Item name | `h3.card__name a` | `.title-name` | - | |
+| Release year | `.card__year` | extracted from name regex `\b(19\|20)\d{2}\b` | - | |
 | Price | `.card__price` | `[data-price]` | regex `\$\d+(\.\d{2})?` | Currency varies by query param |
-| Merchant | `.card__merchant` | `.merchant-name` | — | |
+| Merchant | `.card__merchant` | `.merchant-name` | - | |
 
 ## Detail page
 
@@ -357,7 +357,7 @@ You'll find out from a sudden drop in success rate. Steps:
 5. **Document in the per-scraper selector reference.** Note the date of the change and what changed.
 6. **Push and observe.** Success rate should recover within hours.
 
-If the site changed structurally (e.g., switched from table-based to card-based layout), the recovery may require rewriting the route handler, not just updating selectors. Plan for this — schema validation catching the shape change is what triggers the alert.
+If the site changed structurally (e.g., switched from table-based to card-based layout), the recovery may require rewriting the route handler, not just updating selectors. Plan for this - schema validation catching the shape change is what triggers the alert.
 
 ---
 
@@ -370,7 +370,7 @@ When you scrape an internal API, the JSON path is your selector. Same principles
 - Document the expected shape in `{source}-api.md` in the scraper's repo.
 - Cache responses (a cache layer: KV Store on Apify; Redis / Postgres / disk on a standalone host) so a transient API change doesn't take you offline immediately.
 
-The API equivalent of a "selector change" is a schema migration. The alert mechanism — schema validation rejecting the response — is the same.
+The API equivalent of a "selector change" is a schema migration. The alert mechanism - schema validation rejecting the response - is the same.
 
 ---
 
@@ -389,11 +389,11 @@ This is a deliberate defender pattern: encrypt form field names per session with
 Approach when you encounter this:
 
 1. **First, ask if you should.** A defender who built rotating encrypted form fields is sending a clear signal. Re-read `legal-ethics.md` for the principles. For most public-data scraping, this is a sign to walk away.
-2. **If the use case is genuinely legitimate** (e.g., you have explicit permission, the data is genuinely public, the protection is over-aggressive vs. fair use), the only viable approach is a real browser running the actual JavaScript. Don't try to decrypt the obfuscated code — defenders rotate the encryption regularly to defeat reverse engineering. Live execution is faster, more stable, and more ethically defensible (you're running the page as it was meant to run).
+2. **If the use case is genuinely legitimate** (e.g., you have explicit permission, the data is genuinely public, the protection is over-aggressive vs. fair use), the only viable approach is a real browser running the actual JavaScript. Don't try to decrypt the obfuscated code - defenders rotate the encryption regularly to defeat reverse engineering. Live execution is faster, more stable, and more ethically defensible (you're running the page as it was meant to run).
 3. **Camoufox or PlaywrightCrawler with Crawlee fingerprints** is the right tool. Let the browser load the form, fill it normally via Playwright's input methods, submit it. The browser's JS engine handles encryption and dynamic field injection.
 4. **Token replay won't help here.** The encrypted fields are tied to the specific page load and don't survive across sessions.
 
-This pattern is not common — most sites don't go this far — but recognizing it tells you exactly what tier of effort the defender invested. Calibrate your response (or your decision to walk away) accordingly.
+This pattern is not common - most sites don't go this far - but recognizing it tells you exactly what tier of effort the defender invested. Calibrate your response (or your decision to walk away) accordingly.
 
 ---
 
@@ -410,4 +410,4 @@ For every scraper:
 - Monitor success rate; investigate drops within a day.
 - Maintain fixtures alongside selectors; they evolve together.
 
-This is what production scrapers do. The selector itself is the smallest part — the discipline around it is what makes the difference.
+This is what production scrapers do. The selector itself is the smallest part - the discipline around it is what makes the difference.

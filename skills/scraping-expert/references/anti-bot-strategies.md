@@ -1,8 +1,8 @@
-# Anti-Bot Strategies — The Escalation Ladder
+# Anti-Bot Strategies - The Escalation Ladder
 
 This page is the playbook for getting past anti-bot detection without overpaying. The model is a four-level ladder. You always start at the lowest level that fits the diagnostic and escalate one level at a time on observed failure. Each level adds cost; never skip levels you haven't tried.
 
-The fundamental insight: anti-bot is a **trust score**, not a binary check. Each request accumulates signals — IP reputation, TLS fingerprint, browser fingerprint, header consistency, behavioral patterns. A few suspicious signals are tolerated; many are not. Each level of this ladder reduces the number of suspicious signals, until you cross the threshold to "trusted enough".
+The fundamental insight: anti-bot is a **trust score**, not a binary check. Each request accumulates signals - IP reputation, TLS fingerprint, browser fingerprint, header consistency, behavioral patterns. A few suspicious signals are tolerated; many are not. Each level of this ladder reduces the number of suspicious signals, until you cross the threshold to "trusted enough".
 
 ---
 
@@ -12,9 +12,9 @@ Before any tactic, internalize the framing. **No system that operates over the n
 
 Three corollaries follow from this:
 
-1. **Economic asymmetry decides outcomes.** A scraper that costs $0.10 per request to a target whose data is worth $0.01 has lost. A scraper that costs $0.001 to data worth $0.05 wins easily. Diagnostic-driven tool selection is fundamentally an economics exercise — pick the cheapest level of the ladder that produces results, not the most stealthy.
+1. **Economic asymmetry decides outcomes.** A scraper that costs $0.10 per request to a target whose data is worth $0.01 has lost. A scraper that costs $0.001 to data worth $0.05 wins easily. Diagnostic-driven tool selection is fundamentally an economics exercise - pick the cheapest level of the ladder that produces results, not the most stealthy.
 2. **There is no permanent bypass.** Defenders update; the techniques that worked last quarter degrade. The scraper that survives is the one with monitoring (success rate dashboards, error categorization) and rapid response, not the one with the cleverest one-shot stealth trick.
-3. **The defender is also constrained.** Aggressive anti-bot creates false positives that block real users — costing the target conversions and revenue. This is why most sites don't run "I'm Under Attack" mode permanently. The defender has to keep their own threshold tunable; you operate in the gap they leave open for legitimate users.
+3. **The defender is also constrained.** Aggressive anti-bot creates false positives that block real users - costing the target conversions and revenue. This is why most sites don't run "I'm Under Attack" mode permanently. The defender has to keep their own threshold tunable; you operate in the gap they leave open for legitimate users.
 
 Treat anti-bot as the cost function it is, not as an arms race to be won decisively. Pick your tools to keep the cost low and the success rate above threshold; expect to revisit the configuration every few months.
 
@@ -22,23 +22,23 @@ Treat anti-bot as the cost function it is, not as an arms race to be won decisiv
 
 ## The four pillars of detection
 
-Before the escalation ladder, internalize the detection model. Every anti-bot vendor — Cloudflare, Akamai, DataDome, PerimeterX, AWS WAF — combines these four pillars. Knowing which pillar a given vendor emphasizes tells you which pillar to harden.
+Before the escalation ladder, internalize the detection model. Every anti-bot vendor - Cloudflare, Akamai, DataDome, PerimeterX, AWS WAF - combines these four pillars. Knowing which pillar a given vendor emphasizes tells you which pillar to harden.
 
-### Pillar 1 — IP reputation and analysis
+### Pillar 1 - IP reputation and analysis
 
 The first thing the server learns about you is your IP. It is the cheapest signal to evaluate and the cheapest defense layer. Vendors maintain live reputation databases scored on:
 
-- **IP type** (datacenter / ISP / residential / mobile) — datacenter is most suspicious by default.
-- **ASN ownership** — Cloudflare's ASN 13335 is one entity, AWS uses several. Whole ASNs can be flagged or blocked per site policy.
-- **Subnet membership** — `/24` blocks of misbehaving IPs get blanket-blocked. A "fresh" IP in a poisoned subnet is born suspicious.
-- **Anonymity markers** — known VPN IPs, Tor exit nodes, open proxies are pre-flagged.
-- **Abuse history** — the IP's past activity follows it forever.
-- **Request velocity** — hundreds of requests per second from one address can't be human.
-- **Geographic consistency** — the IP location must match the browser's claimed timezone, locale, and stay stable within a session.
+- **IP type** (datacenter / ISP / residential / mobile) - datacenter is most suspicious by default.
+- **ASN ownership** - Cloudflare's ASN 13335 is one entity, AWS uses several. Whole ASNs can be flagged or blocked per site policy.
+- **Subnet membership** - `/24` blocks of misbehaving IPs get blanket-blocked. A "fresh" IP in a poisoned subnet is born suspicious.
+- **Anonymity markers** - known VPN IPs, Tor exit nodes, open proxies are pre-flagged.
+- **Abuse history** - the IP's past activity follows it forever.
+- **Request velocity** - hundreds of requests per second from one address can't be human.
+- **Geographic consistency** - the IP location must match the browser's claimed timezone, locale, and stay stable within a session.
 
 Defense at this layer: proxy rotation with the right tier (see `diagnostic.md` Question 4), country alignment, request-rate budget per IP.
 
-### Pillar 2 — Browser and connection fingerprinting
+### Pillar 2 - Browser and connection fingerprinting
 
 Once the IP passes, the system inspects how you appear at three layers:
 
@@ -50,7 +50,7 @@ The detection mode is **consistency**, not absolute values. A Chrome User-Agent 
 
 Defense at this layer: a real browser (Playwright/Camoufox) for the TLS+browser layers, or a TLS-impersonating HTTP client (`got-scraping`, `curl-cffi`, `tls-client`) for HTTP-only crawling. **Never hand-craft fingerprints**; use Crawlee's generator, which produces internally consistent sets.
 
-### Pillar 3 — Behavioral analysis
+### Pillar 3 - Behavioral analysis
 
 Even if IP and fingerprint look right, the system watches *how* you behave:
 
@@ -60,11 +60,11 @@ Even if IP and fingerprint look right, the system watches *how* you behave:
 - **Navigation flow**: humans usually enter at the homepage, browse a category, then arrive at a detail page. Bots jump straight to deep URLs.
 - **Cookie banner interaction**: humans see and dismiss the banner before content. Bots that go straight to data without acknowledging the banner are flagged.
 - **Session duration variance**: humans linger inconsistently. Bots leave instantly after extracting.
-- **Continuous validation**: PerimeterX/HUMAN, in particular, runs sensors throughout the session, not once at start. Passing the entry check is not enough — every action must look human.
+- **Continuous validation**: PerimeterX/HUMAN, in particular, runs sensors throughout the session, not once at start. Passing the entry check is not enough - every action must look human.
 
 Defense at this layer: humanization in the browser (gaussian delays, scroll, hover, dismiss banners), front-door navigation flow, persistent cookies/sessions to look like a returning user.
 
-### Pillar 4 — Active challenges
+### Pillar 4 - Active challenges
 
 When pillars 1–3 produce a borderline trust score, the site issues a challenge:
 
@@ -81,7 +81,7 @@ The CAPTCHA model is being replaced by **Private Access Tokens** (Privacy Pass s
 
 ---
 
-## Level 1 — HTTP with consistent fingerprint
+## Level 1 - HTTP with consistent fingerprint
 
 **Cost**: minimal. **Solves**: rate limiting, naive header checks, basic IP reputation.
 
@@ -97,7 +97,7 @@ This is the default. Most sites in the wild are at this level of protection.
 
 ### Why it works
 
-Naive scrapers (Python `requests`, Node `fetch`) have a distinct JA3/JA4 TLS fingerprint that doesn't match any real browser. WAFs maintain blocklists of these signatures. `got-scraping` ships a TLS stack that produces browser-like fingerprints — Chrome, Firefox, or Safari, depending on configuration.
+Naive scrapers (Python `requests`, Node `fetch`) have a distinct JA3/JA4 TLS fingerprint that doesn't match any real browser. WAFs maintain blocklists of these signatures. `got-scraping` ships a TLS stack that produces browser-like fingerprints - Chrome, Firefox, or Safari, depending on configuration.
 
 Datacenter proxies are cheap and abundant. They get blocked sooner than residential, but for sites with light protection they last long enough.
 
@@ -106,7 +106,7 @@ Datacenter proxies are cheap and abundant. They get blocked sooner than resident
 - Sites that fingerprint the browser via JavaScript (Cloudflare's `cf_chl_jschl_tk`, Akamai's `_abck`, etc.). The TLS is fine, but no JS execution = no challenge solving = block.
 - Targets that geo-restrict by IP and your datacenter proxies are flagged as VPN.
 - Volume thresholds (10 000+/hour from a single worker will burn a datacenter proxy pool fast).
-- **TCP/IP layer detection** (rare but real): if you proxy a Chrome-on-Windows User-Agent through a Linux box, the underlying TCP TTL is 64 (Linux default) instead of 128 (Windows default). Sophisticated anti-bot stacks compare TCP-layer signals to the claimed OS. Mitigation: when this is the suspected cause, the proxy itself must run on the matching OS, or the request must terminate at a cloud proxy network's edge where the OS is opaque (e.g. Apify's proxy infrastructure — TCP signals come from Apify's edge, not from your local stack).
+- **TCP/IP layer detection** (rare but real): if you proxy a Chrome-on-Windows User-Agent through a Linux box, the underlying TCP TTL is 64 (Linux default) instead of 128 (Windows default). Sophisticated anti-bot stacks compare TCP-layer signals to the claimed OS. Mitigation: when this is the suspected cause, the proxy itself must run on the matching OS, or the request must terminate at a cloud proxy network's edge where the OS is opaque (e.g. Apify's proxy infrastructure - TCP signals come from Apify's edge, not from your local stack).
 
 ### Code pattern
 
@@ -134,11 +134,11 @@ Inside Crawlee, `BasicCrawler` or `HttpCrawler` plus `gotScraping` covers this t
 
 ---
 
-## Level 2 — Sessions and proxy rotation
+## Level 2 - Sessions and proxy rotation
 
 **Cost**: same proxies, more orchestration. **Solves**: per-session rate limiting, IP cooldowns, lightweight behavioral checks.
 
-When Level 1 starts giving 429/403 after the first 50–500 requests from a given IP, the issue is not the technique — it's the IP burning out. Sessions fix this.
+When Level 1 starts giving 429/403 after the first 50–500 requests from a given IP, the issue is not the technique - it's the IP burning out. Sessions fix this.
 
 ### What you change
 
@@ -169,13 +169,13 @@ const crawler = new CheerioCrawler({
   },
   // tell Crawlee to retry the request with a new session on a blocked status
   retryOnBlocked: true,
-  // accept that some sessions will burn — give us extra rotations before giving up on the request
+  // accept that some sessions will burn - give us extra rotations before giving up on the request
   maxSessionRotations: 10,
   maxRequestRetries: 5,
 });
 ```
 
-`retryOnBlocked: true` is the magic flag — Crawlee detects 403/429/503 (and their browser equivalents) and rotates the session automatically.
+`retryOnBlocked: true` is the magic flag - Crawlee detects 403/429/503 (and their browser equivalents) and rotates the session automatically.
 
 ### What still trips this level
 
@@ -185,7 +185,7 @@ const crawler = new CheerioCrawler({
 
 ### The clearance cookie / token replay pattern
 
-When a site issues a clearance cookie or session token after a JS challenge — `cf_clearance` (Cloudflare), `_abck` (Akamai), `datadome` (DataDome), Kasada `KP_*` cookies — that token is reusable across many requests within its TTL (typically 30 minutes to several hours). This is the single highest-leverage optimization for browser-based scrapers: solve once, scrape many.
+When a site issues a clearance cookie or session token after a JS challenge - `cf_clearance` (Cloudflare), `_abck` (Akamai), `datadome` (DataDome), Kasada `KP_*` cookies - that token is reusable across many requests within its TTL (typically 30 minutes to several hours). This is the single highest-leverage optimization for browser-based scrapers: solve once, scrape many.
 
 The pattern:
 
@@ -229,7 +229,7 @@ Token replay reduces cost on protected sites by 50–95% depending on the volume
 
 ---
 
-## Level 3 — Throttling and humanization
+## Level 3 - Throttling and humanization
 
 **Cost**: lower throughput, residential proxies, longer wall time. **Solves**: behavioral analysis, geo-restrictions, aggressive WAFs.
 
@@ -240,13 +240,13 @@ When Level 2 still produces 403s, the problem is no longer "you're a bot" but "y
 - Switch to residential proxies (Apify: the `RESIDENTIAL` group) with country code matching the user-facing locale of the data.
 - Reduce `maxConcurrency` aggressively (2–5 instead of 10–20).
 - Add randomized delays between requests (1–5 seconds, drawn from a distribution).
-- Add request-handler delays inside the handler (gaussian, not uniform — humans don't have flat distributions).
+- Add request-handler delays inside the handler (gaussian, not uniform - humans don't have flat distributions).
 - For browser-based crawlers: scroll progressively, hover before clicking, randomize viewport per session.
 - Vary request order. Don't process IDs sequentially; shuffle the queue.
 
 ### Why it works
 
-Residential IPs come from real ISPs (Comcast, Orange, BT). A residential pool is shared with real users — blocking the IP also blocks legitimate visitors. Anti-bot systems are conservative on residential.
+Residential IPs come from real ISPs (Comcast, Orange, BT). A residential pool is shared with real users - blocking the IP also blocks legitimate visitors. Anti-bot systems are conservative on residential.
 
 Throttling and humanization defeat behavioral analysis. The signal "scrolls 3 px in 50 ms" or "clicks within 100 ms of page load" is a fingerprint of automation. Random gaussian delays look human.
 
@@ -339,7 +339,7 @@ async function dismissCookieBanner(page: Page) {
 }
 ```
 
-Beyond banners, **session continuity** is itself a behavioral signal. A scraper that starts a fresh browser context for every request looks like a string of first-time visitors — which is unnatural. Persist cookies and storage across related requests within the same session pool entry. Crawlee's `persistCookiesPerSession: true` does this; on standalone scrapers, use Playwright's `storageState` option to save and reuse session state.
+Beyond banners, **session continuity** is itself a behavioral signal. A scraper that starts a fresh browser context for every request looks like a string of first-time visitors - which is unnatural. Persist cookies and storage across related requests within the same session pool entry. Crawlee's `persistCookiesPerSession: true` does this; on standalone scrapers, use Playwright's `storageState` option to save and reuse session state.
 
 ### Time the runs intentionally
 
@@ -347,7 +347,7 @@ Anti-bot systems are most aggressive during peak traffic to the target site. Run
 
 ### Vary entry points at scale
 
-When running hundreds of concurrent jobs against the same site, uniform navigation patterns become a fingerprint themselves — even across different IPs. If every job goes "homepage → search bar → submit → detail page", the aggregate traffic looks robotic. Mix entry points: some jobs start at the homepage, some at category pages, some via search. The aggregate looks more organic, and the cost is small (a tiny variation in code paths).
+When running hundreds of concurrent jobs against the same site, uniform navigation patterns become a fingerprint themselves - even across different IPs. If every job goes "homepage → search bar → submit → detail page", the aggregate traffic looks robotic. Mix entry points: some jobs start at the homepage, some at category pages, some via search. The aggregate looks more organic, and the cost is small (a tiny variation in code paths).
 
 This pairs naturally with horizontal autoscaling: instead of a single worker running 1000 concurrent requests, run multiple instances (e.g. several Apify Actor runs, separate processes, or serverless invocations) with slightly different starting strategies.
 
@@ -359,15 +359,15 @@ This pairs naturally with horizontal autoscaling: instead of a single worker run
 
 ---
 
-## Level 4 — Engine-level stealth or managed API
+## Level 4 - Engine-level stealth or managed API
 
 **Cost**: high. **Solves**: every level above, at a price.
 
 This is where you stop and ask: should we build this ourselves, or pay someone?
 
-### Option A — Camoufox (build it yourself)
+### Option A - Camoufox (build it yourself)
 
-Camoufox is the only open-source tool that consistently passes 0% headless detection. It modifies Firefox at the C++ level — no JavaScript patches that detection systems can see through. Use when:
+Camoufox is the only open-source tool that consistently passes 0% headless detection. It modifies Firefox at the C++ level - no JavaScript patches that detection systems can see through. Use when:
 
 - You have ongoing volume on a hard target (Camoufox per-call cost amortizes over many requests).
 - You want full control over the scraper.
@@ -383,14 +383,14 @@ const options = await camoufoxLaunchOptions({
   proxy: residentialProxyUrl,
   geoip: true,             // align timezone, locale, screen size with proxy IP
   humanize: true,          // built-in mouse/scroll/click humanization
-  block_images: false,     // don't block images on hardest targets — anti-bot may detect missing
+  block_images: false,     // don't block images on hardest targets - anti-bot may detect missing
   block_webrtc: true,      // prevent WebRTC IP leak that exposes datacenter origin
   os: 'windows',           // pin OS for fingerprint stability
   geoip_country: 'US',     // explicit if not detected from proxy
 });
 ```
 
-### Option B — Managed scraping API (pay for it)
+### Option B - Managed scraping API (pay for it)
 
 When the target is one you'll only hit occasionally, or when DIY economics don't work, use a managed provider. They take the URL, return the rendered page or extracted data. See `managed-apis.md`.
 
@@ -419,12 +419,12 @@ Quick reference for the major anti-bot vendors. Read in conjunction with the dia
 
 Default WAF: Level 1–2 (HTTP + sessions + datacenter often enough; residential as fallback).
 Bot Fight Mode: Level 3 (browser + residential).
-Under Attack Mode: Level 4 (Camoufox or managed API). Some sites enable this only intermittently — check before assuming it's permanent.
+Under Attack Mode: Level 4 (Camoufox or managed API). Some sites enable this only intermittently - check before assuming it's permanent.
 
 What to know about Cloudflare specifically:
-- **Shared reputation across the Cloudflare network**: an IP flagged on one Cloudflare-protected site can be blocked on others. This is a network effect — millions of sites share signals.
+- **Shared reputation across the Cloudflare network**: an IP flagged on one Cloudflare-protected site can be blocked on others. This is a network effect - millions of sites share signals.
 - **Turnstile** runs invisible challenges (TLS handshake analysis, browser behavior) for low-risk traffic, only escalating to a visible challenge on suspicion. Most users never see it.
-- **JS challenges issue a `cf_clearance` cookie** valid for 30+ minutes — solving once and reusing the cookie within that window dramatically reduces challenge volume.
+- **JS challenges issue a `cf_clearance` cookie** valid for 30+ minutes - solving once and reusing the cookie within that window dramatically reduces challenge volume.
 
 ### Akamai Bot Manager
 
@@ -435,7 +435,7 @@ What to know about Akamai specifically:
 - **Sensor data**: Akamai-protected pages embed JavaScript that captures mouse movements, keystroke timing, scroll depth, tab focus, and POSTs them to `/_bm/...` or `/akamai/...` endpoints. Without the sensor data, the session is flagged as bot.
 - **Session flow tracking**: Akamai evaluates the entire navigation sequence, not individual requests. Direct-to-deep-URL fails; homepage→category→detail is much more likely to pass.
 - **Edge-level integration**: Akamai operates at the CDN edge, correlating IP, ASN, request velocity, and geolocation in real time. Inconsistency at any layer feeds into one trust score.
-- **Bot Score is exposed in headers** (`Akamai-Bot-Score`, `True-Client-IP`) on some configurations — useful diagnostically.
+- **Bot Score is exposed in headers** (`Akamai-Bot-Score`, `True-Client-IP`) on some configurations - useful diagnostically.
 
 ### PerimeterX / HUMAN Security
 
@@ -452,9 +452,9 @@ What to know about HUMAN/PerimeterX specifically:
 Level 3 sometimes works on lighter configurations. Level 4 for the standard production setup.
 
 What to know about DataDome specifically:
-- **Sub-2ms scoring**: every request is scored against ML-trained models in under 2 ms. This means your scraper has essentially no opportunity to "learn" its way past — feedback is immediate and final.
+- **Sub-2ms scoring**: every request is scored against ML-trained models in under 2 ms. This means your scraper has essentially no opportunity to "learn" its way past - feedback is immediate and final.
 - **Cross-platform coverage**: DataDome protects browsers, mobile apps, and APIs uniformly. A scraper that disguises browser traffic but hits an API endpoint with bare requests is caught at the API.
-- **Adaptive learning**: DataDome's models are continuously retrained on bot traffic patterns. Techniques that worked last month often fail this month — assume non-stationarity.
+- **Adaptive learning**: DataDome's models are continuously retrained on bot traffic patterns. Techniques that worked last month often fail this month - assume non-stationarity.
 - The `datadome` cookie is the session token; once issued, reusing it within its TTL avoids re-challenges.
 
 ### AWS WAF
@@ -477,12 +477,12 @@ Level 4. Kasada uses heavily obfuscated JavaScript that issues per-session, dyna
 
 What to do:
 - Real browser execution is mandatory. Camoufox handles this; standard Playwright with Crawlee fingerprints often does too.
-- The obfuscated JS *can* be evaluated live — once it runs in a real browser, the resulting proof token is extractable. Combine token replay (above) with real-browser solve.
+- The obfuscated JS *can* be evaluated live - once it runs in a real browser, the resulting proof token is extractable. Combine token replay (above) with real-browser solve.
 - Don't try to reverse-engineer the obfuscation. Kasada specifically rotates the obfuscation regularly to defeat reverse engineering. Live execution is faster and more stable.
 
 ### Shape Security (F5 Distributed Cloud)
 
-Bank, airline, and ticketing-grade. Generally Level 4 plus careful behavioral mimicry. Shape correlates session continuity, device fingerprints, and long-term reputation across visits — passing once is not enough; the device identity persists.
+Bank, airline, and ticketing-grade. Generally Level 4 plus careful behavioral mimicry. Shape correlates session continuity, device fingerprints, and long-term reputation across visits - passing once is not enough; the device identity persists.
 
 What to know:
 - Most active around authentication and checkout flows. Anonymous public-content scraping faces a lighter version.
@@ -491,20 +491,20 @@ What to know:
 
 ### Forter / ThreatMetrix
 
-Fraud-focused vendors used at the auth/payment layer. They build cross-device graphs — your fingerprint is correlated with other devices that have appeared in similar contexts. Suspicious clusters get stepped up to multi-factor or hard blocks.
+Fraud-focused vendors used at the auth/payment layer. They build cross-device graphs - your fingerprint is correlated with other devices that have appeared in similar contexts. Suspicious clusters get stepped up to multi-factor or hard blocks.
 
-These are largely a non-issue for public-content scraping. They become relevant if you're scraping anything that touches account creation or payment, in which case the right answer is "don't" — see `legal-ethics.md`.
+These are largely a non-issue for public-content scraping. They become relevant if you're scraping anything that touches account creation or payment, in which case the right answer is "don't" - see `legal-ethics.md`.
 
 ### Regional vendors
 
 Different markets are dominated by different vendors. When scraping non-US sites, check for these:
 
-- **YandexCaptcha / Yandex SmartCaptcha** — used widely on Russian sites (.ru), often paired with Yandex's own anti-bot infrastructure.
-- **Qrator** — Russian DDoS/anti-bot. ASN/DNS-policy-driven. Sensitive to bursts.
-- **GeeTest** — dominant in China (.cn). Slider, click, and inference-based puzzles. Often paired with Alibaba/Tencent infrastructure.
-- **FriendlyCaptcha** — privacy-focused, lightweight. Cryptographic puzzle solved client-side. Common on EU sites that want to be GDPR-friendly.
+- **YandexCaptcha / Yandex SmartCaptcha** - used widely on Russian sites (.ru), often paired with Yandex's own anti-bot infrastructure.
+- **Qrator** - Russian DDoS/anti-bot. ASN/DNS-policy-driven. Sensitive to bursts.
+- **GeeTest** - dominant in China (.cn). Slider, click, and inference-based puzzles. Often paired with Alibaba/Tencent infrastructure.
+- **FriendlyCaptcha** - privacy-focused, lightweight. Cryptographic puzzle solved client-side. Common on EU sites that want to be GDPR-friendly.
 
-Strategies are the same as the major vendors — real browser, residential proxies in the right country, normal pacing — but the country code on your proxy must match. A Chinese site with GeeTest will treat US residential IPs with suspicion regardless of how clean they are.
+Strategies are the same as the major vendors - real browser, residential proxies in the right country, normal pacing - but the country code on your proxy must match. A Chinese site with GeeTest will treat US residential IPs with suspicion regardless of how clean they are.
 
 ### "Naive" rate limiting
 
@@ -541,11 +541,11 @@ A short list of advice you'll see in older blog posts that should be ignored:
 - **Setting `navigator.webdriver = false` manually in 2026.** Modern detection cross-references this with dozens of other signals; spoofing one signal while leaving others inconsistent is itself a flag. Crawlee's defaults handle this consistently; let them.
 - **Solving CAPTCHAs as the answer to a 403.** A CAPTCHA means you've already failed earlier checks. Solve the upstream problem (proxy, fingerprint, session) so CAPTCHAs don't appear. CAPTCHA solvers are a last resort.
 
-## Defender's red flags — patterns the scraper must NOT generate
+## Defender's red flags - patterns the scraper must NOT generate
 
 Modern anti-bot systems are tuned by what defenders see in their dashboards. Knowing what spikes their alerts is knowing what your scraper must avoid producing. The signals that get scrapers blocked en masse:
 
-- **Sudden spike in failed login attempts** from one IP or fingerprint. Scrapers that touch login pages — even just to read public profile info that requires auth — produce this signal. Avoid login flows entirely unless using legitimate credentials sparingly.
+- **Sudden spike in failed login attempts** from one IP or fingerprint. Scrapers that touch login pages - even just to read public profile info that requires auth - produce this signal. Avoid login flows entirely unless using legitimate credentials sparingly.
 - **High new account creation rate**. A well-scoped scraper doesn't create accounts, but if it inadvertently triggers signup forms, this fires. Make sure the scraper visits *only* the public pages it needs.
 - **Unusual geographic distribution**. Hundreds of requests in 5 minutes from IPs that span 20 countries are obviously coordinated. Stay within a few country codes per session pool, ideally one matching the target's primary user base.
 - **Abnormally high request rate from a single IP**. Even with good IPs, exceeding the per-IP request budget triggers IP-level rate limiting at the vendor (not just the target). Stay below ~30 requests/minute per IP for sensitive targets, much lower for very sensitive ones.

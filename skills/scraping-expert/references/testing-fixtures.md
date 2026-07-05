@@ -1,6 +1,6 @@
-# Testing — Fixtures, Mocks, No Live Network
+# Testing - Fixtures, Mocks, No Live Network
 
-The local test suite never makes a real network request. Not to the target site, not to your platform or runtime, not to any third-party API. This holds regardless of where the scraper runs — standalone script, VPS cron, serverless function, web-app backend, or Apify Actor. Treat it as a hard rule — and once you live with it, you discover it's also better engineering.
+The local test suite never makes a real network request. Not to the target site, not to your platform or runtime, not to any third-party API. This holds regardless of where the scraper runs - standalone script, VPS cron, serverless function, web-app backend, or Apify Actor. Treat it as a hard rule - and once you live with it, you discover it's also better engineering.
 
 This page is the testing doctrine.
 
@@ -14,13 +14,13 @@ Three reasons:
 2. **Determinism.** Live tests fail randomly when the target is slow, blocks the request, or changes content. Fixture-based tests have one cause of failure: the code. They are reliable.
 3. **Speed.** A network round trip is 200ms minimum, 5+ seconds with browsers. A fixture-based test runs in milliseconds. The full test suite runs in seconds, not minutes.
 
-The trade-off is real: fixtures go stale. The mitigation is to refresh fixtures from real runs (in whatever environment is permitted to scrape — an Apify run, a sanctioned remote host) and version them alongside the code.
+The trade-off is real: fixtures go stale. The mitigation is to refresh fixtures from real runs (in whatever environment is permitted to scrape - an Apify run, a sanctioned remote host) and version them alongside the code.
 
 ---
 
 ## What gets mocked
 
-Mock everything that crosses the process boundary — your HTTP client, your platform/runtime SDK, and any third-party SDKs. On a standalone scraper that means your DB client, cache, and queue; on an Apify Actor it means the Apify SDK. Same discipline either way.
+Mock everything that crosses the process boundary - your HTTP client, your platform/runtime SDK, and any third-party SDKs. On a standalone scraper that means your DB client, cache, and queue; on an Apify Actor it means the Apify SDK. Same discipline either way.
 
 | Component | Mock with |
 |---|---|
@@ -78,7 +78,7 @@ import { beforeEach, vi } from 'vitest';
 // it fails fast instead of hitting the real network.
 beforeEach(() => {
   vi.spyOn(global, 'fetch').mockImplementation(() => {
-    throw new Error('fetch() called in tests — mock it.');
+    throw new Error('fetch() called in tests - mock it.');
   });
 });
 ```
@@ -89,7 +89,7 @@ Run: `npx vitest run` for one-shot, `npx vitest` for watch mode (local only, nev
 
 ## Capturing fixtures
 
-Fixtures come from real runs in an environment permitted to scrape — never from local scraping. The capture flow (Apify shown; on a standalone host, swap the KV Store write for a write to local disk or object storage):
+Fixtures come from real runs in an environment permitted to scrape - never from local scraping. The capture flow (Apify shown; on a standalone host, swap the KV Store write for a write to local disk or object storage):
 
 1. Deploy a debug build that saves the raw HTML or JSON response to durable storage (Apify KV Store, a file, an S3 bucket) on every request.
 2. Run it on a representative input.
@@ -98,7 +98,7 @@ Fixtures come from real runs in an environment permitted to scrape — never fro
 5. Save to `tests/fixtures/` with descriptive names: `search-results-page1.json`, `detail-item-12345.html`.
 
 ```ts
-// In the scraper (debug build — Apify example):
+// In the scraper (debug build - Apify example):
 import { Actor } from 'apify';
 
 async function captureForFixture(name: string, content: string | object) {
@@ -233,7 +233,7 @@ import { vi } from 'vitest';
 vi.mock('apify');  // uses tests/__mocks__/apify.ts automatically
 ```
 
-Then in tests (Apify example; the general analogue is asserting that the irreversible side effect — a DB commit, a charge — fires only on the success path):
+Then in tests (Apify example; the general analogue is asserting that the irreversible side effect - a DB commit, a charge - fires only on the success path):
 
 ```ts
 import { Actor } from 'apify';
@@ -411,7 +411,7 @@ The resilience suite encodes the error decision table from `error-handling-ppe.m
 
 ## Continuous integration
 
-Tests run on every commit (locally, before push). Since they don't hit the network, they pass anywhere — no API keys needed, no Apify account needed, no proxy access needed.
+Tests run on every commit (locally, before push). Since they don't hit the network, they pass anywhere - no API keys needed, no Apify account needed, no proxy access needed.
 
 For a private repo (GitHub or GitLab), a basic CI config:
 
@@ -435,7 +435,7 @@ jobs:
       - run: npm run lint
 ```
 
-The CI environment must have no scraping tools running and no network access to target sites. If the test suite tries to reach a target, it fails — which is correct.
+The CI environment must have no scraping tools running and no network access to target sites. If the test suite tries to reach a target, it fails - which is correct.
 
 ---
 
@@ -444,7 +444,7 @@ The CI environment must have no scraping tools running and no network access to 
 Fixtures go stale. A six-month-old fixture from a site that changed three months ago tests against a phantom. Discipline:
 
 - **Refresh fixtures every 30–90 days** for active scrapers (set a calendar reminder).
-- **Refresh on every selector change** — when you update a selector, capture a fresh fixture during the same sanctioned run (Apify or otherwise) that proved the new selector worked.
+- **Refresh on every selector change** - when you update a selector, capture a fresh fixture during the same sanctioned run (Apify or otherwise) that proved the new selector worked.
 - **Keep the previous fixture** for one cycle. If the new fixture causes test failures and the new selector also fails on production, you can compare diffs to find what changed.
 
 Fixtures are part of the codebase, version-controlled. Every change to a fixture is a commit with a message explaining what changed and why.

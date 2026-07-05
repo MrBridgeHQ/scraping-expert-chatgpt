@@ -1,12 +1,12 @@
 # Error Handling and PPE Billing (Apify deployment doctrine)
 
-> **Scope.** This file is **Apify-specific deployment doctrine**. The platform-agnostic part — the **failure taxonomy** (`TARGET_BLOCKED` vs `EXTRACTION_FAILED` vs rate-limit vs `TARGET_NOT_FOUND`, and "a 200 with an empty/fake body is a silent block") — applies to any scraper and is summarized in `SKILL.md` Phase 4. The Apify *implementation* below (exit SUCCEEDED, `Actor.charge`, `setStatusMessage`, free-plan handling) is what's deployment-specific.
+> **Scope.** This file is **Apify-specific deployment doctrine**. The platform-agnostic part - the **failure taxonomy** (`TARGET_BLOCKED` vs `EXTRACTION_FAILED` vs rate-limit vs `TARGET_NOT_FOUND`, and "a 200 with an empty/fake body is a silent block") - applies to any scraper and is summarized in `SKILL.md` Phase 4. The Apify *implementation* below (exit SUCCEEDED, `Actor.charge`, `setStatusMessage`, free-plan handling) is what's deployment-specific.
 
 The single highest-impact pattern for a production Apify portfolio is the **graceful exit** pattern. It is the difference between a 50% success rate (visible to users, hurting Store ranking) and a 95%+ success rate (Store-friendly, retains users).
 
 This page documents the **engineering implementation** of the graceful-exit + PPE-billing pattern from the scraping-engineering perspective: error categorization, exit-status table, charge helper, error decision tree. These are recommended defaults, not arbitrary preferences.
 
-This file documents the scraping-engineering-specific layer: how the graceful-exit pattern integrates with Crawlee, how error categorization drives status messages, the per-Actor charge helper. The canonical PPE *pricing* doctrine — event taxonomy design, `pay_per_event.json` schema, the PPE+usage toggle exception list, and common PPE antipatterns — is a separate monetization concern. On any substantive contradiction about charging mechanics, the monetization doctrine wins.
+This file documents the scraping-engineering-specific layer: how the graceful-exit pattern integrates with Crawlee, how error categorization drives status messages, the per-Actor charge helper. The canonical PPE *pricing* doctrine - event taxonomy design, `pay_per_event.json` schema, the PPE+usage toggle exception list, and common PPE antipatterns - is a separate monetization concern. On any substantive contradiction about charging mechanics, the monetization doctrine wins.
 
 ---
 
@@ -18,7 +18,7 @@ Infrastructure failures are: out-of-memory, Docker container crash, platform-sid
 
 The user opens the Apify Console. They see a green SUCCEEDED status. They open the dataset. They see a clear error message. They understand what happened. They never need to read the raw logs.
 
-This single rule routinely lifts Actors from ~50% success rate to >95%, with zero changes to scraping logic. The Actor is doing the same work — it's just communicating more clearly.
+This single rule routinely lifts Actors from ~50% success rate to >95%, with zero changes to scraping logic. The Actor is doing the same work - it's just communicating more clearly.
 
 ---
 
@@ -82,10 +82,10 @@ Things to notice:
 
 - `Actor.fail()` is never called for business errors. The catch block exits via `Actor.exit()`.
 - The error record has a fixed shape: `error`, `errorType`, `message`, optional `suggestion`, optional `details`, `timestamp`.
-- The status message is set to terminal — it freezes at the end of the run and shows in the Console.
+- The status message is set to terminal - it freezes at the end of the run and shows in the Console.
 - PPE charge happens *only* on the success path, before exit, after `pushData`.
 
-`Actor.fail()` is reserved exclusively for cases where the platform itself has lost confidence in the run — out-of-memory, Docker crash, fatal initialization errors. In practice, you almost never need to call it; the platform will mark the run as FAILED on its own when those conditions are hit.
+`Actor.fail()` is reserved exclusively for cases where the platform itself has lost confidence in the run - out-of-memory, Docker crash, fatal initialization errors. In practice, you almost never need to call it; the platform will mark the run as FAILED on its own when those conditions are hit.
 
 ---
 
@@ -108,7 +108,7 @@ Recovery for the user: change configuration, retry.
 ### `TARGET_NOT_FOUND`
 
 Cause: the requested resource (URL, ID, search term) returned 404 or "no results".
-Handling: distinguish from blocking — 404 with a clean response is informational, not an error in itself. Push the result with `notFound: true`. Whether to charge depends on the contract — usually yes (the user asked for a lookup, you performed it; the answer is "doesn't exist").
+Handling: distinguish from blocking - 404 with a clean response is informational, not an error in itself. Push the result with `notFound: true`. Whether to charge depends on the contract - usually yes (the user asked for a lookup, you performed it; the answer is "doesn't exist").
 Recovery for the user: usually nothing; this is the answer.
 
 ### `API_RATE_LIMITED`
@@ -191,7 +191,7 @@ await Actor.charge({ eventName: 'item-processed', count: 1 });
 
 Never charge inside try blocks where exceptions might prevent the data from being delivered. Charge after delivery.
 
-**Atomic shortcut (preferred where it fits):** when the event corresponds to a dataset item, prefer `Actor.pushData(data, 'event-name')` — it combines persistence and charging atomically and avoids the (tiny) crash-between-pushData-and-charge gap.
+**Atomic shortcut (preferred where it fits):** when the event corresponds to a dataset item, prefer `Actor.pushData(data, 'event-name')` - it combines persistence and charging atomically and avoids the (tiny) crash-between-pushData-and-charge gap.
 
 ```ts
 const chargeResult = await Actor.pushData(result, 'item-processed');
@@ -199,7 +199,7 @@ const chargeResult = await Actor.pushData(result, 'item-processed');
 
 The atomic shortcut is generally the preferred pattern. Both patterns are valid; the two-call form remains useful for illustrating the rule and for cases where the charge corresponds to non-dataset value (e.g. a successful side-effect like a webhook delivery).
 
-**Double-charging gotcha:** if your `pay_per_event.json` declares `apify-default-dataset-item` AND a custom event, calling `Actor.pushData(data, 'custom-event')` charges **both** events — the synthetic `apify-default-dataset-item` (auto-fires on every default-dataset write) AND your custom event. This is almost never what you want. Either declare the synthetic OR the custom event, not both — unless the dual charge is intentional (rare).
+**Double-charging gotcha:** if your `pay_per_event.json` declares `apify-default-dataset-item` AND a custom event, calling `Actor.pushData(data, 'custom-event')` charges **both** events - the synthetic `apify-default-dataset-item` (auto-fires on every default-dataset write) AND your custom event. This is almost never what you want. Either declare the synthetic OR the custom event, not both - unless the dual charge is intentional (rare).
 
 ### 2. Never charge on retry
 
@@ -209,7 +209,7 @@ If you retry an operation due to a transient failure, you charge once for the fi
 // Anti-pattern: charging in a retry loop
 for (let i = 0; i < 3; i++) {
   try {
-    await fetchAndCharge();  // charges once per attempt — WRONG
+    await fetchAndCharge();  // charges once per attempt - WRONG
     break;
   } catch (e) { /* retry */ }
 }
@@ -248,7 +248,7 @@ if (result.eventChargeLimitReached) {
 
 The Actor still completes successfully; the dataset is delivered; the user just doesn't get charged. This is intentional: free-plan users shouldn't be blocked from getting their result, they should just be aware of the limit.
 
-### 6. PPE + usage toggle — default OFF, two narrow exceptions
+### 6. PPE + usage toggle - default OFF, two narrow exceptions
 
 The "Pay per event + usage" toggle exists in the Apify Console (Monetization → Pricing). A sound default is **PPE only**, with the toggle **OFF** in production. Two narrow exceptions:
 
@@ -278,7 +278,7 @@ interface ChargeOptions {
 }
 
 /**
- * Charges a PPE event. NEVER call Actor.charge() directly — use this wrapper.
+ * Charges a PPE event. NEVER call Actor.charge() directly - use this wrapper.
  * It enforces the rules:
  * - Verifies count > 0
  * - Logs the charge attempt (visible in Apify Console logs)

@@ -1,4 +1,4 @@
-# scraping-expert — ChatGPT / Codex Agent Skill
+# scraping-expert - ChatGPT / Codex Agent Skill
 
 An Agent Skill **for ChatGPT (OpenAI Codex)**. **Target LLM: ChatGPT / Codex.**
 

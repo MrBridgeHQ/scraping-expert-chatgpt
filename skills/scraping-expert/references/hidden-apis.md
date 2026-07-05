@@ -1,4 +1,4 @@
-# Hidden APIs — The First Move
+# Hidden APIs - The First Move
 
 The single highest-leverage technique in scraping is discovering that the site you are about to scrape is already serving its own data via a clean JSON endpoint. Every modern web app talks to a backend; that traffic is observable. Spending 20 minutes finding the internal API beats 200 hours fighting anti-bot to scrape the rendered HTML.
 
@@ -10,9 +10,9 @@ This applies even when an official API exists. Public APIs are rate-limited, pay
 
 Three concrete examples:
 
-- **A catalog/marketplace site** — endpoints `/api/explore`, `/api/items/{id}`, `/api/items/{id}/reviews`, `/api/items/{id}/prices`. No HTML scraping needed for 95% of the data; runs as a lightweight Cheerio/HTTP scraper. Without this discovery, the project would be a 4 GB Camoufox scraper at 10× the cost.
-- **Most e-commerce sites** — product detail pages call `/api/v1/products/{id}` returning the full product JSON, including stock, prices, variants. The HTML is a thin shell over this.
-- **Mobile app APIs** — many sites have a mobile-app backend on a different subdomain (`m.example.com/api/...`, `mobile-api.example.com/...`) with looser anti-bot.
+- **A catalog/marketplace site** - endpoints `/api/explore`, `/api/items/{id}`, `/api/items/{id}/reviews`, `/api/items/{id}/prices`. No HTML scraping needed for 95% of the data; runs as a lightweight Cheerio/HTTP scraper. Without this discovery, the project would be a 4 GB Camoufox scraper at 10× the cost.
+- **Most e-commerce sites** - product detail pages call `/api/v1/products/{id}` returning the full product JSON, including stock, prices, variants. The HTML is a thin shell over this.
+- **Mobile app APIs** - many sites have a mobile-app backend on a different subdomain (`m.example.com/api/...`, `mobile-api.example.com/...`) with looser anti-bot.
 
 The principle: **scrape the source of truth, not the rendering of it**.
 
@@ -22,39 +22,39 @@ The principle: **scrape the source of truth, not the rendering of it**.
 
 The procedure runs in your browser. The local shell never makes a request. The output is a list of endpoints with their parameters.
 
-### Step 1 — Open DevTools on the target
+### Step 1 - Open DevTools on the target
 
 Open the site in Chrome/Firefox, open DevTools (F12), and switch to the **Network** tab. Filter by **Fetch/XHR**. This hides static assets and shows only the API traffic.
 
-### Step 2 — Reproduce the user-facing action
+### Step 2 - Reproduce the user-facing action
 
 Perform the action you want to scrape: search a term, filter results, paginate, open a detail page. Each action should generate one or more `Fetch/XHR` requests. These are your candidate endpoints.
 
-For paginated lists, scroll/click to page 2 — the pagination parameter (`page`, `offset`, `cursor`, `after`) reveals itself in the diff between page 1 and page 2 requests.
+For paginated lists, scroll/click to page 2 - the pagination parameter (`page`, `offset`, `cursor`, `after`) reveals itself in the diff between page 1 and page 2 requests.
 
-### Step 3 — Identify the canonical endpoint
+### Step 3 - Identify the canonical endpoint
 
 For a given user action, you usually see 5–20 requests. Most are tracking, ads, analytics. Filter mentally for endpoints that:
 - Return JSON (Response tab → look for `{...}`)
 - Have a path that suggests data (`/api/`, `/graphql`, `/_next/data/`, `/wp-json/`, `/services/`)
 - Carry the data you actually want (look at the Response panel)
 
-Right-click the request → **Copy as cURL**. This gives you the full request including headers, cookies, and parameters — verbatim. It is the starting point for your client implementation.
+Right-click the request → **Copy as cURL**. This gives you the full request including headers, cookies, and parameters - verbatim. It is the starting point for your client implementation.
 
-### Step 4 — Strip to minimum viable headers
+### Step 4 - Strip to minimum viable headers
 
 Most browser requests carry 15–30 headers, most of which are unnecessary. Reduce the cURL to the minimum set that still works. Test by removing headers one at a time (do this in your browser with a tool like Postman or Insomnia, not from the local shell).
 
 The headers that almost always matter:
-- `User-Agent` — must be present and realistic
-- `Accept` — usually `application/json`
-- `Accept-Language` — affects content language and sometimes behavior
-- `Referer` — many APIs check it; copy it from the real request
+- `User-Agent` - must be present and realistic
+- `Accept` - usually `application/json`
+- `Accept-Language` - affects content language and sometimes behavior
+- `Referer` - many APIs check it; copy it from the real request
 
 The headers that often matter:
-- `X-Requested-With: XMLHttpRequest` — flags the request as AJAX, sometimes required
-- `Authorization: Bearer ...` — if present, you need the auth flow
-- Site-specific headers (`X-API-Key`, `X-CSRF-Token`, custom `X-*-Client` headers) — investigate origin
+- `X-Requested-With: XMLHttpRequest` - flags the request as AJAX, sometimes required
+- `Authorization: Bearer ...` - if present, you need the auth flow
+- Site-specific headers (`X-API-Key`, `X-CSRF-Token`, custom `X-*-Client` headers) - investigate origin
 
 The headers that almost never matter (drop them):
 - `Sec-Fetch-*`
@@ -62,7 +62,7 @@ The headers that almost never matter (drop them):
 - `DNT`, `Upgrade-Insecure-Requests`
 - Most cookies (test with a clean session)
 
-### Step 5 — Document the endpoint
+### Step 5 - Document the endpoint
 
 Capture the spec like this:
 
@@ -114,7 +114,7 @@ const data = JSON.parse($('#__NEXT_DATA__').html());
 const props = data.props.pageProps;
 ```
 
-This often contains the full server-side data without a separate API call. For paginated/dynamic data, also check for `/_next/data/<buildId>/<route>.json` — the same endpoint Next.js uses internally for client-side navigation.
+This often contains the full server-side data without a separate API call. For paginated/dynamic data, also check for `/_next/data/<buildId>/<route>.json` - the same endpoint Next.js uses internally for client-side navigation.
 
 ### Nuxt.js sites
 
@@ -128,7 +128,7 @@ Pure client-rendered React apps fetch from real APIs after page load. The DevToo
 
 Detection: requests to `/graphql` with a POST body containing `{"query": "...", "variables": {...}}`.
 
-Approach: copy the exact query string and variables from a successful browser request. GraphQL queries are persistable — once you have a working query, you have it forever (until the schema changes). Many sites also accept persisted queries by hash, which is even more stable.
+Approach: copy the exact query string and variables from a successful browser request. GraphQL queries are persistable - once you have a working query, you have it forever (until the schema changes). Many sites also accept persisted queries by hash, which is even more stable.
 
 ### WordPress sites
 
@@ -142,13 +142,13 @@ Each has a documented public API surface that's often left open. Shopify: `/prod
 
 The mobile apps of major sites talk to APIs that are usually less protected than the web frontend. Tools like `mitmproxy` can intercept this traffic (do this on your own machine, not from the agent's local shell). Once intercepted, the headers and endpoints are usable from any HTTP client.
 
-The mobile-app User-Agent in the endpoint spec above (e.g. `AppName/8.18.12 CFNetwork/...`) is the kind of header extracted from iOS app traffic — many APIs accept it directly.
+The mobile-app User-Agent in the endpoint spec above (e.g. `AppName/8.18.12 CFNetwork/...`) is the kind of header extracted from iOS app traffic - many APIs accept it directly.
 
 ---
 
 ## When there is no internal API
 
-Sometimes the site really does render everything server-side and there is no JSON anywhere. In that case, fall back to HTML scraping with `CheerioCrawler` or `PlaywrightCrawler`. Confirm this conclusion before accepting it — most modern sites have *something* JSON-flavored even when it's not obvious.
+Sometimes the site really does render everything server-side and there is no JSON anywhere. In that case, fall back to HTML scraping with `CheerioCrawler` or `PlaywrightCrawler`. Confirm this conclusion before accepting it - most modern sites have *something* JSON-flavored even when it's not obvious.
 
 Also check:
 - The mobile site (`m.example.com`)
@@ -178,7 +178,7 @@ Some internal APIs require a session cookie, a CSRF token, or a Bearer token. Th
 
 ### Cookie-based auth
 
-Capture the session cookie from a logged-in browser. For your own account, this is fine and legal. For scraping data behind a login that isn't yours, that crosses into authorized-access territory — see `legal-ethics.md`. Don't.
+Capture the session cookie from a logged-in browser. For your own account, this is fine and legal. For scraping data behind a login that isn't yours, that crosses into authorized-access territory - see `legal-ethics.md`. Don't.
 
 The cookie expires; refresh it via a login flow (using credentials stored as environment variables / secrets, never committed). The refresh flow uses `PlaywrightCrawler` (or a headless browser) to log in and extract the session cookie, which is then reused by `CheerioCrawler` (or a plain HTTP client) for the actual scraping.
 
